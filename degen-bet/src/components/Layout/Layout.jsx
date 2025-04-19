@@ -1,8 +1,9 @@
 import React from "react";
+import styles from "./Layout.module.css";
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen w-full bg-primary text-white relative flex flex-col">
+    <div className={styles.layoutContainer}>
       {/* The children will be arranged in the proper order in App.jsx */}
       {/* This main container just sets up the dark theme and basic structure */}
       {children}

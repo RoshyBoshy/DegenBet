@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import styles from "./Header.module.css";
 
 const Header = () => {
   // Mock cryptocurrency price data
@@ -17,9 +18,44 @@ const Header = () => {
     { symbol: "SHIB", price: "$0.00002134", change: "+6.1%" },
   ]);
 
-  // Simulate price updates
+  const tickerRef = useRef(null);
+  const [tickerWidth, setTickerWidth] = useState(0);
+
+  // Create a separate price updater that doesn't affect the animation
+  const [priceUpdateTrigger, setPriceUpdateTrigger] = useState(0);
+
+  // Measure the actual width of a single set of ticker items
+  useEffect(() => {
+    const measureWidth = () => {
+      if (tickerRef.current) {
+        const firstTickerItems =
+          tickerRef.current.querySelector(".ticker-items");
+        if (firstTickerItems) {
+          setTickerWidth(firstTickerItems.offsetWidth);
+        }
+      }
+    };
+
+    // Initial measurement after render
+    setTimeout(measureWidth, 100);
+
+    // Re-measure on window resize
+    window.addEventListener("resize", measureWidth);
+    return () => window.removeEventListener("resize", measureWidth);
+  }, []);
+
+  // Simulate price updates without affecting the animation
   useEffect(() => {
     const interval = setInterval(() => {
+      setPriceUpdateTrigger((prev) => prev + 1);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update prices when the trigger changes
+  useEffect(() => {
+    if (priceUpdateTrigger > 0) {
       setCryptoPrices((prevPrices) => {
         return prevPrices.map((crypto) => {
           // Random price change between -0.5% and +0.5%
@@ -57,35 +93,73 @@ const Header = () => {
           };
         });
       });
-    }, 3000);
+    }
+  }, [priceUpdateTrigger]);
 
-    return () => clearInterval(interval);
-  }, []);
+  // Animation duration calculation (constant speed regardless of screen size)
+  const animationDuration = tickerWidth > 0 ? tickerWidth / 80 : 30; // Pixels per second
+
+  const renderTickerItems = () => {
+    return cryptoPrices.map((crypto, index) => {
+      const isLastItem = index === cryptoPrices.length - 1;
+      return (
+        <div
+          key={index}
+          className={isLastItem ? styles.lastCryptoItem : styles.cryptoItem}
+          style={{ width: "auto", minWidth: "160px" }}
+        >
+          <span className={styles.symbolText}>{crypto.symbol}</span>
+          <span className={styles.priceText}>{crypto.price}</span>
+          <span
+            className={`${styles.changeText} ${
+              crypto.change.startsWith("+")
+                ? styles.positiveChange
+                : styles.negativeChange
+            }`}
+          >
+            {crypto.change}
+          </span>
+        </div>
+      );
+    });
+  };
 
   return (
-    <div className="w-full h-14 bg-secondary fixed top-0 left-0 flex items-center overflow-hidden z-10 border-b border-accent/30">
-      <div className="flex whitespace-nowrap animate-ticker">
-        {/* Display each price three times to ensure continuous scrolling with no gaps */}
-        {[...cryptoPrices, ...cryptoPrices, ...cryptoPrices].map(
-          (crypto, index) => (
-            <div
-              key={index}
-              className="flex items-center mx-2 px-3 py-1.5 border-r border-accent/20"
-            >
-              <span className="font-bold text-white">{crypto.symbol}</span>
-              <span className="mx-2 text-gray-300">{crypto.price}</span>
-              <span
-                className={`${
-                  crypto.change.startsWith("+")
-                    ? "text-positive font-medium"
-                    : "text-negative font-medium"
-                }`}
-              >
-                {crypto.change}
-              </span>
-            </div>
-          )
+    <div className={styles.headerContainer}>
+      <div ref={tickerRef} className={styles.tickerContainer}>
+        {tickerWidth > 0 && (
+          <style>
+            {`
+              @keyframes ticker {
+                0% {
+                  transform: translateX(0);
+                }
+                100% {
+                  transform: translateX(-${tickerWidth}px);
+                }
+              }
+            `}
+          </style>
         )}
+        <div
+          className={styles.tickerWrapper}
+          style={{
+            animation:
+              tickerWidth > 0
+                ? `ticker ${animationDuration}s linear infinite`
+                : "none",
+          }}
+        >
+          {/* First set of items */}
+          <div className={`ticker-items ${styles.tickerItems}`}>
+            {renderTickerItems()}
+          </div>
+
+          {/* Duplicate set for seamless looping */}
+          <div className={`ticker-items ${styles.tickerItems}`}>
+            {renderTickerItems()}
+          </div>
+        </div>
       </div>
     </div>
   );

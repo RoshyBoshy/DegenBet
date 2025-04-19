@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import styles from "./BalanceDisplay.module.css";
 
 const BalanceDisplay = ({ balance }) => {
   const [animatedBalance, setAnimatedBalance] = useState(balance);
@@ -17,23 +18,19 @@ const BalanceDisplay = ({ balance }) => {
   }, [balance, animatedBalance]);
 
   return (
-    <div className="fixed top-18 left-4 bg-secondary p-4 rounded-lg border border-accent shadow-xl z-10 transition-all duration-300 hover:shadow-accent/20">
-      <div className="text-sm text-gray-300 uppercase tracking-wider font-medium">
-        Your Balance
-      </div>
+    <div className={styles.balanceContainer}>
+      <div className={styles.balanceLabel}>Your Balance</div>
       <div
-        className={`text-2xl font-bold ${
-          isFlashing ? "text-positive animate-pulse" : "text-white"
-        } transition-colors duration-300`}
+        className={`${styles.balanceValue} ${
+          isFlashing ? styles.flashing : ""
+        }`}
       >
         {typeof animatedBalance === "number"
           ? animatedBalance.toLocaleString()
           : animatedBalance}
-        <span className="text-sm ml-1 text-accent">DEGEN</span>
+        <span className={styles.currencySymbol}>DEGEN</span>
       </div>
-      <div className="text-xs text-gray-400 mt-2 italic">
-        Virtual Currency Only
-      </div>
+      <div className={styles.disclaimer}>Virtual Currency Only</div>
     </div>
   );
 };

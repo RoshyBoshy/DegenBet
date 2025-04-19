@@ -1,3 +1,5 @@
+@import "./styles/variables.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,8 +19,8 @@ body,
 }
 
 body {
-  background-color: theme("colors.primary");
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
   overflow-x: hidden;
 }
 
@@ -49,17 +51,17 @@ input {
 
 /* Neon glow effects */
 .neon-glow {
-  box-shadow: 0 0 5px theme("colors.accent"), 0 0 10px theme("colors.accent");
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
+  transition: box-shadow var(--transition-normal) ease;
 }
 
 .neon-glow:hover {
-  box-shadow: 0 0 8px theme("colors.accent"), 0 0 15px theme("colors.accent"),
-    0 0 20px theme("colors.accent");
+  box-shadow: 0 0 8px var(--color-accent), 0 0 15px var(--color-accent),
+    0 0 20px var(--color-accent);
 }
 
 .neon-text {
-  text-shadow: 0 0 5px theme("colors.accent"), 0 0 10px theme("colors.accent");
+  text-shadow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
 }
 
 /* Scrollbar styling */
@@ -69,16 +71,16 @@ input {
 }
 
 ::-webkit-scrollbar-track {
-  background: theme("colors.primary");
+  background: var(--color-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: theme("colors.accent");
-  border-radius: 4px;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: theme("colors.accent");
+  background: var(--color-accent);
   opacity: 0.8;
 }
 

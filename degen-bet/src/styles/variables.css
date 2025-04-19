@@ -1,0 +1,69 @@
+:root {
+  /* Main Theme Colors */
+  --color-primary: #0f172a;
+  --color-primary-rgb: 15, 23, 42;
+
+  --color-secondary: #1e293b;
+  --color-secondary-rgb: 30, 41, 59;
+
+  --color-accent: #7c3aed;
+  --color-accent-rgb: 124, 58, 237;
+
+  /* Functional Colors */
+  --color-positive: #4ade80;
+  --color-positive-rgb: 74, 222, 128;
+
+  --color-negative: #f87171;
+  --color-negative-rgb: 248, 113, 113;
+
+  /* Text Colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af;
+
+  /* Interactive States */
+  --color-hover: rgba(124, 58, 237, 0.1);
+  --color-active: rgba(124, 58, 237, 0.2);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Animation Durations */
+  --transition-fast: 0.15s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* Z-Index Levels */
+  --z-below: -1;
+  --z-normal: 1;
+  --z-above: 10;
+  --z-modal: 50;
+  --z-overlay: 100;
+  --z-max: 9999;
+}

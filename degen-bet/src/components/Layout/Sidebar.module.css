@@ -1,0 +1,199 @@
+/* Sidebar.module.css */
+.sidebarContainer {
+  position: fixed;
+  top: 18px;
+  left: 1rem;
+  width: 18rem; /* w-72 */
+  background-color: var(--color-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 10;
+  margin-top: 4rem;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.sidebarHeader {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(var(--color-accent-rgb), 0.2);
+  position: sticky;
+  top: 0;
+  background-color: var(--color-secondary);
+}
+
+.headerTitle {
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  letter-spacing: 0.025em;
+  display: flex;
+  align-items: center;
+}
+
+.headerIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+  color: var(--color-accent);
+}
+
+.betCount {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.betsContainer {
+  padding: 0.5rem;
+}
+
+.betCard {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--color-primary);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+  transition: all 0.3s;
+}
+
+.betCard:hover {
+  border-color: rgba(var(--color-accent-rgb), 0.4);
+}
+
+.betHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assetName {
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+.targetLabel {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.upLabel {
+  background-color: rgba(var(--color-positive-rgb), 0.2);
+  color: var(--color-positive);
+}
+
+.downLabel {
+  background-color: rgba(var(--color-negative-rgb), 0.2);
+  color: var(--color-negative);
+}
+
+.timeRemaining {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #d1d5db; /* text-gray-300 */
+}
+
+.timeRemaining.expiringSoon {
+  color: var(--color-negative);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.targetInfo {
+  margin-top: 0.5rem;
+  font-weight: 500;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+.targetLabel {
+  font-size: 0.75rem;
+  color: #9ca3af; /* text-gray-400 */
+  margin-right: 0.25rem;
+}
+
+.betDetails {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  align-items: flex-end;
+}
+
+.detailsLabel {
+  font-size: 0.75rem;
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.amountValue {
+  font-weight: 500;
+  color: white;
+}
+
+.currencyLabel {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+}
+
+.profitLossPositive {
+  font-weight: 500;
+  color: var(--color-positive);
+}
+
+.profitLossNegative {
+  font-weight: 500;
+  color: var(--color-negative);
+}
+
+.progressBarContainer {
+  margin-top: 0.75rem;
+  width: 100%;
+  background-color: rgba(var(--color-accent-rgb), 0.1);
+  border-radius: 9999px;
+  height: 0.375rem;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.progressBarPositive {
+  background-color: var(--color-positive);
+}
+
+.progressBarNegative {
+  background-color: var(--color-negative);
+}
+
+.emptyState {
+  padding: 1.5rem;
+  color: #9ca3af; /* text-gray-400 */
+  text-align: center;
+}
+
+.emptyStateIcon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.75rem;
+  color: #4b5563; /* text-gray-600 */
+}
+
+.emptyStateMessage {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

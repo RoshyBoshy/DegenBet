@@ -1,0 +1,150 @@
+/* CentralMenu.module.css */
+.container {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.gridContainer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuCard {
+  position: absolute;
+  z-index: 20;
+  background-color: var(--color-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: all 0.3s ease;
+}
+
+.menuCard:hover {
+  box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.3);
+}
+
+.menuCardContent {
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-image: linear-gradient(
+    to bottom right,
+    var(--color-primary),
+    var(--color-secondary),
+    rgba(var(--color-accent-rgb), 0.2)
+  );
+}
+
+.menuHeader {
+  text-align: center;
+}
+
+.menuTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: white;
+}
+
+.menuSubtitle {
+  color: #d1d5db;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.liveIndicator {
+  display: inline-block;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-positive);
+  margin-right: 0.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.primaryButton {
+  background-color: var(--color-accent);
+  color: white;
+  font-weight: 700;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primaryButton:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.8);
+}
+
+.secondaryButton {
+  background-color: var(--color-secondary);
+  color: white;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.4);
+  font-weight: 700;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondaryButton:hover {
+  background-color: rgba(var(--color-secondary-rgb), 0.8);
+}
+
+.buttonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+.roomCard {
+  position: absolute;
+  z-index: 10;
+  background-color: var(--color-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: all 0.3s ease;
+}
+
+.roomCard:hover {
+  box-shadow: 0 0 15px rgba(var(--color-accent-rgb), 0.2);
+  transform: scale(1.05);
+  z-index: 30;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

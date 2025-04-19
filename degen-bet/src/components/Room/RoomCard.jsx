@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import styles from "./RoomCard.module.css";
 
 // Simplified price chart component
 const PriceChart = ({ asset, trend }) => {
@@ -69,7 +70,12 @@ const PriceChart = ({ asset, trend }) => {
   }, [asset, trend, isPositive]);
 
   return (
-    <canvas ref={canvasRef} width="210" height="50" className="w-full h-12" />
+    <canvas
+      ref={canvasRef}
+      width="210"
+      height="50"
+      className={styles.priceChart}
+    />
   );
 };
 
@@ -160,18 +166,16 @@ const RoomCard = ({ room, onPlaceBet }) => {
   };
 
   return (
-    <div className="bg-secondary rounded-lg overflow-hidden w-full h-full flex flex-col border border-accent/20">
+    <div className={styles.roomCard}>
       {/* Header with asset info */}
-      <div className="bg-primary p-3 border-b border-accent/20 flex justify-between items-center">
-        <div className="flex items-center">
-          <span className="font-bold text-lg text-white">{room.asset}</span>
-          <span className="ml-2 text-xs px-2 py-0.5 bg-accent/20 rounded-full text-gray-300">
-            {room.type}
-          </span>
+      <div className={styles.header}>
+        <div className={styles.assetInfo}>
+          <span className={styles.assetSymbol}>{room.asset}</span>
+          <span className={styles.assetType}>{room.type}</span>
         </div>
         <div
-          className={`font-medium text-sm ${
-            isFlashing ? "text-negative animate-pulse" : "text-gray-300"
+          className={`${styles.timer} ${
+            isFlashing ? styles.timerFlashing : ""
           }`}
         >
           {timeLeft || room.deadline}
@@ -179,21 +183,19 @@ const RoomCard = ({ room, onPlaceBet }) => {
       </div>
 
       {/* Current price */}
-      <div className="px-3 py-2 bg-primary/50 flex justify-between items-center">
+      <div className={styles.priceInfo}>
         <div>
-          <div className="text-xs text-gray-400">Current Price</div>
-          <div className="text-md font-semibold text-white">
-            {room.currentPrice}
-          </div>
+          <div className={styles.priceLabel}>Current Price</div>
+          <div className={styles.priceValue}>{room.currentPrice}</div>
         </div>
-        <div className="flex items-center">
-          <span className="text-xs mr-2 text-gray-400">Users:</span>
-          <span className="flex items-center text-white text-sm">
+        <div className={styles.userInfo}>
+          <span className={styles.userLabel}>Users:</span>
+          <span className={styles.userCount}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
-              className="w-4 h-4 mr-1 text-accent"
+              className={styles.userIcon}
             >
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
             </svg>
@@ -203,12 +205,12 @@ const RoomCard = ({ room, onPlaceBet }) => {
       </div>
 
       {/* Main content */}
-      <div className="p-3 flex-1 flex flex-col justify-between">
+      <div className={styles.mainContent}>
         {/* Prediction and chart */}
         <div>
-          <div className="mb-2">
-            <div className="text-xs text-gray-400">Prediction Target</div>
-            <div className="text-md font-bold text-white">
+          <div className={styles.predictionSection}>
+            <div className={styles.predictionLabel}>Prediction Target</div>
+            <div className={styles.predictionTarget}>
               {room.asset} will{" "}
               {room.target.startsWith("+")
                 ? "rise"
@@ -220,20 +222,20 @@ const RoomCard = ({ room, onPlaceBet }) => {
           </div>
 
           {/* Simple price chart */}
-          <div className="mb-3 mt-2">
+          <div className={styles.chartContainer}>
             <PriceChart asset={room.asset} trend={getTrendFromTarget()} />
           </div>
 
           {/* Pool distribution visualization */}
-          <div className="mb-3">
-            <div className="flex justify-between text-xs mb-1 text-gray-400">
+          <div className={styles.poolStats}>
+            <div className={styles.poolLabels}>
               <span>YES: {room.yesPercentage}%</span>
               <span>Pool: {room.totalPool} DEGEN</span>
               <span>NO: {room.noPercentage}%</span>
             </div>
-            <div className="h-2 bg-primary rounded-full overflow-hidden">
+            <div className={styles.poolBar}>
               <div
-                className="h-full bg-positive"
+                className={styles.yesPercentage}
                 style={{ width: `${room.yesPercentage}%` }}
               />
             </div>
@@ -242,50 +244,48 @@ const RoomCard = ({ room, onPlaceBet }) => {
 
         {/* Betting interface */}
         {!showBetForm ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className={styles.betButtons}>
             <button
-              className="py-2 rounded-lg font-bold bg-positive hover:bg-positive/90 text-white transition-colors"
+              className={styles.betUpButton}
               onClick={() => handleOptionSelect("UP")}
             >
               BET UP
             </button>
             <button
-              className="py-2 rounded-lg font-bold bg-negative hover:bg-negative/90 text-white transition-colors"
+              className={styles.betDownButton}
               onClick={() => handleOptionSelect("DOWN")}
             >
               BET DOWN
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="flex">
+          <div className={styles.betForm}>
+            <div className={styles.inputGroup}>
               <input
                 type="number"
                 value={betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}
                 placeholder="Bet amount"
-                className="bg-primary text-white rounded-l-lg py-2 px-3 w-full focus:outline-none border border-accent/30 focus:border-accent"
+                className={styles.betInput}
               />
-              <span className="bg-primary border border-l-0 border-accent/30 rounded-r-lg py-2 px-3 text-gray-300">
-                DEGEN
-              </span>
+              <span className={styles.currencySuffix}>DEGEN</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className={styles.betButtons}>
               <button
                 onClick={() => setShowBetForm(false)}
-                className="py-2 rounded-lg font-bold bg-primary text-white border border-accent/30"
+                className={styles.cancelButton}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitBet}
                 disabled={!betAmount}
-                className={`py-2 rounded-lg font-bold ${
+                className={
                   betAmount
-                    ? "bg-accent hover:bg-accent/80 text-white"
-                    : "bg-gray-700 text-gray-400 cursor-not-allowed"
-                }`}
+                    ? styles.submitButton
+                    : `${styles.submitButton} ${styles.disabledButton}`
+                }
               >
                 Place Bet
               </button>

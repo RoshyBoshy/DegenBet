@@ -1,0 +1,61 @@
+/* BalanceDisplay.module.css */
+.balanceContainer {
+  position: fixed;
+  top: 18px;
+  left: 1rem;
+  background-color: var(--color-secondary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 10;
+  transition: all 0.3s;
+}
+
+.balanceContainer:hover {
+  box-shadow: 0 0 15px rgba(var(--color-accent-rgb), 0.2);
+}
+
+.balanceLabel {
+  font-size: 0.875rem;
+  color: #d1d5db; /* text-gray-300 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.balanceValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  transition: color 0.3s;
+}
+
+.flashing {
+  color: var(--color-positive);
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.currencySymbol {
+  font-size: 0.875rem;
+  margin-left: 0.25rem;
+  color: var(--color-accent);
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  color: #9ca3af; /* text-gray-400 */
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

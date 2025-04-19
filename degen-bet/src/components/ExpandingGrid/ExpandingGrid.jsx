@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import styles from "./ExpandingGrid.module.css";
 
 const ExpandingGrid = ({ children }) => {
   // State for grid position and zoom
@@ -79,15 +80,12 @@ const ExpandingGrid = ({ children }) => {
   }, [isDragging, dragStart]);
 
   return (
-    <div
-      className="fixed inset-0 overflow-hidden bg-primary pt-14"
-      ref={gridRef}
-    >
+    <div className={styles.gridContainer} ref={gridRef}>
       {/* Direction controls */}
-      <div className="fixed top-1/2 left-10 transform -translate-y-1/2 z-20 flex flex-col gap-2">
+      <div className={styles.navControlLeft}>
         <button
           onClick={() => navigateGrid("W")}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +93,7 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path
               strokeLinecap="round"
@@ -105,10 +103,10 @@ const ExpandingGrid = ({ children }) => {
           </svg>
         </button>
       </div>
-      <div className="fixed top-10 left-1/2 transform -translate-x-1/2 z-20">
+      <div className={styles.navControlTop}>
         <button
           onClick={() => navigateGrid("N")}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +114,7 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path
               strokeLinecap="round"
@@ -126,10 +124,10 @@ const ExpandingGrid = ({ children }) => {
           </svg>
         </button>
       </div>
-      <div className="fixed top-1/2 right-10 transform -translate-y-1/2 z-20">
+      <div className={styles.navControlRight}>
         <button
           onClick={() => navigateGrid("E")}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +135,7 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path
               strokeLinecap="round"
@@ -147,10 +145,10 @@ const ExpandingGrid = ({ children }) => {
           </svg>
         </button>
       </div>
-      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20">
+      <div className={styles.navControlBottom}>
         <button
           onClick={() => navigateGrid("S")}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -158,7 +156,7 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path
               strokeLinecap="round"
@@ -170,10 +168,10 @@ const ExpandingGrid = ({ children }) => {
       </div>
 
       {/* Zoom controls */}
-      <div className="fixed bottom-10 right-10 z-20 flex gap-2">
+      <div className={styles.zoomControls}>
         <button
           onClick={() => handleZoom(false)}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -181,17 +179,15 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
           </svg>
         </button>
-        <div className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center">
-          {Math.round(zoom * 100)}%
-        </div>
+        <div className={styles.zoomDisplay}>{Math.round(zoom * 100)}%</div>
         <button
           onClick={() => handleZoom(true)}
-          className="w-10 h-10 rounded-full bg-secondary text-white border border-accent flex items-center justify-center hover:bg-accent transition-colors"
+          className={styles.controlButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +195,7 @@ const ExpandingGrid = ({ children }) => {
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={styles.controlIcon}
           >
             <path
               strokeLinecap="round"
@@ -212,7 +208,7 @@ const ExpandingGrid = ({ children }) => {
 
       {/* Grid container with transform based on position and zoom */}
       <div
-        className="absolute inset-0 cursor-grab"
+        className={styles.gridContent}
         style={{
           transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
           transformOrigin: "center",
@@ -220,11 +216,11 @@ const ExpandingGrid = ({ children }) => {
         }}
         onMouseDown={handleMouseDown}
       >
-        <div className="relative w-full h-full bg-primary">
+        <div className={styles.gridBackground}>
           {/* Solid background color */}
           {/* Children will be centered in the grid */}
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="transform scale-100">{children}</div>
+          <div className={styles.gridCenteredContent}>
+            <div className={styles.gridInnerContent}>{children}</div>
           </div>
         </div>
       </div>

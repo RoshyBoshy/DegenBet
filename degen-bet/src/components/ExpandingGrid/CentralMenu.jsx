@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import RoomCard from "../Room/RoomCard";
+import styles from "./CentralMenu.module.css";
 
 const CentralMenu = () => {
   // Mock cryptocurrency price data
@@ -256,8 +257,8 @@ const CentralMenu = () => {
   return (
     <div>
       {/* Grid with rooms */}
-      <div className="min-h-screen w-full relative">
-        <div className="absolute inset-0 flex items-center justify-center">
+      <div className={styles.container}>
+        <div className={styles.gridContainer}>
           {/* Rooms positioned around the center menu */}
           {gridPositions.map((gridPos, index) => {
             // Convert grid coordinates to actual position
@@ -269,7 +270,7 @@ const CentralMenu = () => {
               return (
                 <div
                   key="central-menu"
-                  className="absolute z-20 bg-secondary rounded-xl border border-accent/50 shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-accent/30"
+                  className={styles.menuCard}
                   style={{
                     width: `${cellSize}px`,
                     height: `${cellSize}px`,
@@ -277,26 +278,24 @@ const CentralMenu = () => {
                     top: `calc(50% + ${yPos}px - ${cellSize / 2}px)`,
                   }}
                 >
-                  <div className="w-full h-full p-5 flex flex-col justify-between bg-gradient-to-br from-primary via-secondary to-accent/20">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold mb-1 text-white">
-                        DegenBet
-                      </h2>
-                      <div className="text-gray-300 text-sm flex items-center justify-center">
-                        <span className="inline-block h-2 w-2 rounded-full bg-positive animate-pulse mr-2"></span>
+                  <div className={styles.menuCardContent}>
+                    <div className={styles.menuHeader}>
+                      <h2 className={styles.menuTitle}>DegenBet</h2>
+                      <div className={styles.menuSubtitle}>
+                        <span className={styles.liveIndicator}></span>
                         Crypto Predictions
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <button className="bg-accent hover:bg-accent/80 text-white font-bold py-2.5 px-4 rounded-lg w-full transition-colors duration-300 flex items-center justify-center">
+                    <div className={styles.buttonContainer}>
+                      <button className={styles.primaryButton}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-5 h-5 mr-2"
+                          className={styles.buttonIcon}
                         >
                           <path
                             strokeLinecap="round"
@@ -307,14 +306,14 @@ const CentralMenu = () => {
                         Host Room
                       </button>
 
-                      <button className="bg-secondary hover:bg-secondary/80 text-white border border-accent/40 font-bold py-2.5 px-4 rounded-lg w-full transition-colors duration-300 flex items-center justify-center">
+                      <button className={styles.secondaryButton}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-5 h-5 mr-2"
+                          className={styles.buttonIcon}
                         >
                           <path
                             strokeLinecap="round"
@@ -342,7 +341,7 @@ const CentralMenu = () => {
             return (
               <div
                 key={`room-${room.id}`}
-                className="absolute z-10 bg-secondary rounded-xl border border-accent/30 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-accent/20 hover:scale-105 hover:z-30"
+                className={styles.roomCard}
                 style={{
                   width: `${cellSize}px`,
                   height: `${cellSize}px`,
