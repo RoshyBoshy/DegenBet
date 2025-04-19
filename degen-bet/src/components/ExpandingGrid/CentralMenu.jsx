@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import RoomCard from "../Room/RoomCard";
 import styles from "./CentralMenu.module.css";
 
-const CentralMenu = () => {
+const CentralMenu = ({ onPlaceBet }) => {
   // Mock cryptocurrency price data
   const [cryptoData, setCryptoData] = useState({
     BTC: { price: 60245.32, change: 2.5 },
@@ -206,8 +206,8 @@ const CentralMenu = () => {
     return () => clearInterval(interval);
   }, [cryptoData]);
 
-  // Grid cell dimensions
-  const cellSize = 250;
+  // Increased grid cell dimensions
+  const cellSize = 300; // Increased from 250
 
   // State to store grid positions of each panel
   const [gridPositions, setGridPositions] = useState([]);
@@ -252,6 +252,9 @@ const CentralMenu = () => {
     console.log(`Bet placed in room ${roomId}: ${option} with ${amount} DEGEN`);
     // In a real app, this would call an API to place the bet
     // and update the room state accordingly
+    if (onPlaceBet) {
+      onPlaceBet(roomId, option, amount);
+    }
   };
 
   return (

@@ -1,7 +1,7 @@
 /* BalanceDisplay.module.css */
 .balanceContainer {
   position: fixed;
-  top: 18px;
+  top: 50px;
   left: 1rem;
   background-color: var(--color-secondary);
   padding: 1rem;

@@ -4,14 +4,14 @@ import styles from "./ExpandingGrid.module.css";
 const ExpandingGrid = ({ children }) => {
   // State for grid position and zoom
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.7); // Starting more zoomed out to show more cards
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const gridRef = useRef(null);
 
   // Handle grid navigation via directional buttons
   const navigateGrid = (direction) => {
-    const step = 100; // pixels to move per step
+    const step = 100 / zoom; // Adjust step size based on zoom level
 
     switch (direction) {
       case "N":
@@ -35,7 +35,7 @@ const ExpandingGrid = ({ children }) => {
   const handleZoom = (zoomIn) => {
     setZoom((prev) => {
       const newZoom = zoomIn ? prev + 0.1 : prev - 0.1;
-      return Math.min(Math.max(newZoom, 0.5), 2); // Limit zoom between 0.5x and 2x
+      return Math.min(Math.max(newZoom, 0.4), 2); // Allow more zoom out (0.4x)
     });
   };
 
@@ -66,14 +66,30 @@ const ExpandingGrid = ({ children }) => {
     setIsDragging(false);
   };
 
-  // Add and remove event listeners for mouse drag
+  // Handle zoom via mouse wheel
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const zoomIn = e.deltaY < 0;
+    handleZoom(zoomIn);
+  };
+
+  // Add and remove event listeners for mouse drag and wheel
   useEffect(() => {
+    const gridElement = gridRef.current;
+
+    if (gridElement) {
+      gridElement.addEventListener("wheel", handleWheel, { passive: false });
+    }
+
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
 
     return () => {
+      if (gridElement) {
+        gridElement.removeEventListener("wheel", handleWheel);
+      }
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };

@@ -72,8 +72,8 @@ const PriceChart = ({ asset, trend }) => {
   return (
     <canvas
       ref={canvasRef}
-      width="210"
-      height="50"
+      width="250"
+      height="40"
       className={styles.priceChart}
     />
   );
@@ -85,6 +85,10 @@ const RoomCard = ({ room, onPlaceBet }) => {
   const [showBetForm, setShowBetForm] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
   const [isFlashing, setIsFlashing] = useState(false);
+
+  // Round percentages to whole numbers
+  const yesPercentage = Math.round(room.yesPercentage);
+  const noPercentage = Math.round(room.noPercentage);
 
   // Parse the deadline into seconds and update countdown
   useEffect(() => {
@@ -165,31 +169,68 @@ const RoomCard = ({ room, onPlaceBet }) => {
       : `${percentDiff.toFixed(1)}%`;
   };
 
+  // Format compact deadline display
+  const formatDeadline = (deadline) => {
+    if (!deadline) return "";
+
+    // Convert "2h 30m" to "2:30"
+    const match = deadline.match(/(\d+)h\s*(\d+)m|(\d+)h|(\d+)m/);
+    if (match) {
+      const hours = parseInt(match[1] || match[3] || 0);
+      const mins = parseInt(match[2] || match[4] || 0) || 0;
+      return `${hours}:${mins < 10 ? "0" + mins : mins}`;
+    }
+
+    return deadline;
+  };
+
   return (
     <div className={styles.roomCard}>
       {/* Header with asset info */}
       <div className={styles.header}>
-        <div className={styles.assetInfo}>
+        <div className={styles.headerLeft}>
           <span className={styles.assetSymbol}>{room.asset}</span>
-          <span className={styles.assetType}>{room.type}</span>
+          {room.type === "Price Movement" ? (
+            <div className={styles.roomTypeIndicator}>
+              <span className={styles.percentSymbol}>%</span>
+            </div>
+          ) : (
+            <div className={styles.roomTypeIndicator}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className={styles.targetIcon}
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                <path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z" />
+              </svg>
+            </div>
+          )}
         </div>
-        <div
-          className={`${styles.timer} ${
-            isFlashing ? styles.timerFlashing : ""
-          }`}
-        >
-          {timeLeft || room.deadline}
+        <div className={styles.headerRight}>
+          <div className={styles.poolInfo}>
+            <span className={styles.poolValue}>{room.totalPool}</span>
+            <span className={styles.poolLabel}>DEGEN</span>
+          </div>
+          <div
+            className={`${styles.timer} ${
+              isFlashing ? styles.timerFlashing : ""
+            }`}
+          >
+            {timeLeft || formatDeadline(room.deadline)}
+          </div>
         </div>
       </div>
 
-      {/* Current price */}
-      <div className={styles.priceInfo}>
-        <div>
-          <div className={styles.priceLabel}>Current Price</div>
+      {/* Current price and user count */}
+      <div className={styles.infoRow}>
+        <div className={styles.priceInfo}>
+          <div className={styles.priceLabel}>Price</div>
           <div className={styles.priceValue}>{room.currentPrice}</div>
         </div>
         <div className={styles.userInfo}>
-          <span className={styles.userLabel}>Users:</span>
+          <span className={styles.userLabel}>Users</span>
           <span className={styles.userCount}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -197,65 +238,72 @@ const RoomCard = ({ room, onPlaceBet }) => {
               fill="currentColor"
               className={styles.userIcon}
             >
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
             {room.userCount}
           </span>
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Main content with chart and betting */}
       <div className={styles.mainContent}>
-        {/* Prediction and chart */}
-        <div>
-          <div className={styles.predictionSection}>
-            <div className={styles.predictionLabel}>Prediction Target</div>
-            <div className={styles.predictionTarget}>
-              {room.asset} will{" "}
-              {room.target.startsWith("+")
-                ? "rise"
-                : room.target.startsWith("-")
-                ? "fall"
-                : "reach"}{" "}
-              {room.target}
-            </div>
-          </div>
+        {/* Chart visualization */}
+        <div className={styles.chartContainer}>
+          <PriceChart asset={room.asset} trend={getTrendFromTarget()} />
+        </div>
 
-          {/* Simple price chart */}
-          <div className={styles.chartContainer}>
-            <PriceChart asset={room.asset} trend={getTrendFromTarget()} />
-          </div>
+        {/* Condensed criteria badge */}
+        <div className={styles.criteriaBadge}>
+          {room.target.startsWith("+") || room.target.startsWith("-")
+            ? `${room.target} by ${timeLeft || formatDeadline(room.deadline)}`
+            : `Target: ${room.target}`}
+        </div>
 
-          {/* Pool distribution visualization */}
-          <div className={styles.poolStats}>
-            <div className={styles.poolLabels}>
-              <span>YES: {room.yesPercentage}%</span>
-              <span>Pool: {room.totalPool} DEGEN</span>
-              <span>NO: {room.noPercentage}%</span>
-            </div>
+        {/* Pool distribution visualization with percentages inside the meter */}
+        <div className={styles.poolStats}>
+          <div className={styles.poolBarContainer}>
             <div className={styles.poolBar}>
               <div
                 className={styles.yesPercentage}
-                style={{ width: `${room.yesPercentage}%` }}
-              />
+                style={{ width: `${yesPercentage}%` }}
+              >
+                {yesPercentage > 10 && (
+                  <span className={styles.yesPercentLabel}>
+                    {yesPercentage}%
+                  </span>
+                )}
+              </div>
+              {noPercentage > 10 && (
+                <span
+                  className={styles.noPercentLabel}
+                  style={{
+                    left: `${Math.min(
+                      yesPercentage + 2,
+                      100 - noPercentage / 2
+                    )}%`,
+                  }}
+                >
+                  {noPercentage}%
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Betting interface */}
+        {/* Betting interface right below the meter */}
         {!showBetForm ? (
           <div className={styles.betButtons}>
             <button
-              className={styles.betUpButton}
+              className={styles.betYesButton}
               onClick={() => handleOptionSelect("UP")}
             >
-              BET UP
+              YES
             </button>
             <button
-              className={styles.betDownButton}
+              className={styles.betNoButton}
               onClick={() => handleOptionSelect("DOWN")}
             >
-              BET DOWN
+              NO
             </button>
           </div>
         ) : (
@@ -265,19 +313,9 @@ const RoomCard = ({ room, onPlaceBet }) => {
                 type="number"
                 value={betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}
-                placeholder="Bet amount"
+                placeholder="Amount"
                 className={styles.betInput}
               />
-              <span className={styles.currencySuffix}>DEGEN</span>
-            </div>
-
-            <div className={styles.betButtons}>
-              <button
-                onClick={() => setShowBetForm(false)}
-                className={styles.cancelButton}
-              >
-                Cancel
-              </button>
               <button
                 onClick={handleSubmitBet}
                 disabled={!betAmount}
@@ -287,7 +325,13 @@ const RoomCard = ({ room, onPlaceBet }) => {
                     : `${styles.submitButton} ${styles.disabledButton}`
                 }
               >
-                Place Bet
+                Bet
+              </button>
+              <button
+                onClick={() => setShowBetForm(false)}
+                className={styles.cancelButton}
+              >
+                ×
               </button>
             </div>
           </div>

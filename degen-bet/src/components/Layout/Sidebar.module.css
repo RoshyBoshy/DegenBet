@@ -1,7 +1,7 @@
 /* Sidebar.module.css */
 .sidebarContainer {
   position: fixed;
-  top: 18px;
+  top: 100px;
   left: 1rem;
   width: 18rem; /* w-72 */
   background-color: var(--color-secondary);
@@ -9,7 +9,7 @@
   border: 1px solid rgba(var(--color-accent-rgb), 0.3);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  z-index: 10;
+  z-index: 5;
   margin-top: 4rem;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
