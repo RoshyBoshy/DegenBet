@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import io from "socket.io-client"; // Import socket.io client
 import "./App.css";
 
 // Import our components
@@ -9,12 +10,14 @@ import BalanceDisplay from "./components/Layout/BalanceDisplay";
 import Sidebar from "./components/Layout/Sidebar";
 import Header from "./components/Layout/Header";
 
-function App() {
-  // Mock user data with balance fluctuation
-  const [balance, setBalance] = useState(1000);
+// Define your backend server URL (replace with your actual backend URL when built)
+const SOCKET_SERVER_URL = "http://localhost:3001"; // Example URL
 
-  // Mock active bets
+function App() {
+  // Mock user data (balance, bets - keep as is for now)
+  const [balance, setBalance] = useState(1000);
   const [activeBets, setActiveBets] = useState([
+    // Keep existing mock bets for demo
     {
       id: 1,
       asset: "BTC",
@@ -44,60 +47,102 @@ function App() {
     },
   ]);
 
-  // Simulate random balance changes
+  // ***** NEW: State to hold real-time asset data *****
+  const [realtimeAssetData, setRealtimeAssetData] = useState({}); // e.g., { BTC: { price: '...', changePercent: '...' }, ETH: { ... } }
+
+  // Simulate random balance changes (keep for demo)
   useEffect(() => {
     const balanceUpdater = setInterval(() => {
-      // Random value between -10 and +15
       const change = Math.floor(Math.random() * 25) - 10;
       setBalance((prev) => Math.max(0, prev + change));
     }, 8000);
-
     return () => clearInterval(balanceUpdater);
   }, []);
 
-  // Handle placing a bet
-  const handlePlaceBet = (roomId, option, amount) => {
-    // Convert string amount to number
-    const betAmount = Number(amount);
+  // ***** NEW: Effect for Socket.IO connection *****
+  useEffect(() => {
+    // Connect to the Socket.IO server
+    const socket = io(SOCKET_SERVER_URL);
 
-    // Validate bet
+    console.log("Attempting to connect to Socket.IO server...");
+
+    // Listener for successful connection
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server:", socket.id);
+      // You might want to request initial data or subscribe to specific assets here
+      // socket.emit('requestInitialData');
+    });
+
+    // Listener for price updates from the server
+    socket.on("priceUpdate", (data) => {
+      // Assuming data is an object like: { BTC: { price: '...', changePercent: '...' }, ETH: { ... } }
+      // console.log("Received price update:", data);
+      setRealtimeAssetData((prevData) => ({ ...prevData, ...data }));
+    });
+
+    // Listener for general updates (e.g., room data if backend handles it)
+    socket.on("roomUpdate", (updatedRoomData) => {
+      // console.log("Received room update:", updatedRoomData);
+      // Here you would update the 'rooms' state if rooms data comes from backend
+      // setRooms(prevRooms => /* logic to update rooms */);
+    });
+
+    // Listener for connection errors
+    socket.on("connect_error", (err) => {
+      console.error("Socket.IO connection error:", err.message);
+    });
+
+    // Listener for disconnection
+    socket.on("disconnect", (reason) => {
+      console.log("Disconnected from Socket.IO server:", reason);
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      console.log("Disconnecting Socket.IO...");
+      socket.disconnect();
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Handle placing a bet (keep existing logic)
+  const handlePlaceBet = (roomId, option, amount) => {
+    const betAmount = Number(amount);
     if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
       alert("Invalid bet amount");
       return;
     }
-
-    // Deduct from balance
     setBalance((prev) => prev - betAmount);
-
-    // Add to active bets (simplified for demo)
     const newBet = {
       id: Date.now(),
-      asset: roomId.substring(0, 3), // Just for demo
+      asset: String(roomId).substring(0, 3),
       type: "Price Movement",
       target: option === "UP" ? "+5%" : "-5%",
       expiry: "1h 30m",
       amount: betAmount,
       potentialWin: Math.floor(betAmount * 1.9),
     };
-
     setActiveBets((prev) => [...prev, newBet]);
   };
 
   return (
     <Layout>
-      {/* Fixed price ticker at top */}
-      <Header />
+      {/* Pass real-time data to Header */}
+      <Header assetData={realtimeAssetData} />
 
-      {/* User balance in top-left */}
       <BalanceDisplay balance={balance} />
-
-      {/* Active bets sidebar on left */}
       <Sidebar activeBets={activeBets} />
 
-      {/* Main content with expandable grid */}
-      <div className="mt-16 ml-0 sm:ml-72 transition-all duration-300">
+      {/* Main content */}
+      {/* ml-0 sm:ml-72 might need adjustment based on actual sidebar width */}
+      <div className="main-content-area">
+        {" "}
+        {/* Added a class for potential styling */}
         <ExpandingGrid>
-          <CentralMenu onPlaceBet={handlePlaceBet} />
+          {/* Pass real-time data down to CentralMenu */}
+          <CentralMenu
+            onPlaceBet={handlePlaceBet}
+            assetData={realtimeAssetData}
+          />
         </ExpandingGrid>
       </div>
     </Layout>
@@ -105,3 +150,15 @@ function App() {
 }
 
 export default App;
+
+// Add some basic CSS for layout adjustment if needed in App.css or index.css
+// .main-content-area {
+//   margin-top: 3.5rem; /* Height of Header */
+//   margin-left: 0; /* Adjust based on sidebar */
+//   transition: margin-left 0.3s ease;
+// }
+// @media (min-width: 640px) { /* sm breakpoint */
+//   .main-content-area {
+//     margin-left: 18rem; /* Width of Sidebar */
+//   }
+// }

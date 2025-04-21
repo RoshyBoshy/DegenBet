@@ -1,306 +1,340 @@
-import React, { useState, useEffect, useRef } from "react";
-import styles from "./RoomCard.module.css";
+import React, { useState, useEffect } from "react";
+import styles from "./RoomCard.module.css"; // Use CSS Modules
 
-// Simplified price chart component
-const PriceChart = ({ asset, trend }) => {
-  const canvasRef = useRef(null);
-  const isPositive = trend.startsWith("+");
-
-  // Generate mock chart data
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Generate random price points with a general trend
-    const points = [];
-    const steps = 24;
-    const volatility = 0.2;
-    const trendStrength = parseFloat(trend.replace(/[+\-%]/g, "")) / 100;
-
-    let lastY = height / 2;
-
-    for (let i = 0; i < steps; i++) {
-      // Calculate x position
-      const x = (i / (steps - 1)) * width;
-
-      // Calculate price movement with randomness but following the trend
-      const direction = isPositive ? -1 : 1; // Negative means up (lower y value)
-      const trendComponent = (i / steps) * height * trendStrength * direction;
-      const randomComponent = (Math.random() - 0.5) * height * volatility;
-
-      // Update y position (bounded to stay within canvas)
-      lastY = Math.max(
-        5,
-        Math.min(height - 5, lastY + randomComponent + trendComponent / steps)
-      );
-      points.push({ x, y: lastY });
-    }
-
-    // Draw path
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach((point) => ctx.lineTo(point.x, point.y));
-
-    // Style the line
-    ctx.strokeStyle = isPositive ? "#4ade80" : "#f87171";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Add gradient fill below the line
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    if (isPositive) {
-      gradient.addColorStop(0, "rgba(74, 222, 128, 0.2)");
-      gradient.addColorStop(1, "rgba(74, 222, 128, 0)");
-    } else {
-      gradient.addColorStop(0, "rgba(248, 113, 113, 0.2)");
-      gradient.addColorStop(1, "rgba(248, 113, 113, 0)");
-    }
-
-    ctx.lineTo(points[points.length - 1].x, height);
-    ctx.lineTo(points[0].x, height);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-  }, [asset, trend, isPositive]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      width="250"
-      height="40"
-      className={styles.priceChart}
-    />
-  );
+// Helper function to get full asset name (can be expanded)
+const getAssetName = (symbol) => {
+  const names = {
+    BTC: "Bitcoin",
+    ETH: "Ethereum",
+    SOL: "Solana",
+    ADA: "Cardano",
+    DOGE: "Dogecoin",
+    XRP: "XRP",
+    DOT: "Polkadot",
+    AVAX: "Avalanche",
+    LINK: "Chainlink",
+    MATIC: "Polygon",
+  };
+  return names[symbol] || symbol;
 };
 
 const RoomCard = ({ room, onPlaceBet }) => {
-  const [betAmount, setBetAmount] = useState("");
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [showBetForm, setShowBetForm] = useState(false);
+  // Use props directly instead of mock data
+  const roomData = room;
+
+  // State for hover effects (optional, handled by CSS :hover now)
+  // const [isHovered, setIsHovered] = useState(false);
+
+  // State for time left and progress (keep existing logic)
   const [timeLeft, setTimeLeft] = useState("");
-  const [isFlashing, setIsFlashing] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0); // Keep for potential use if needed later
 
-  // Round percentages to whole numbers
-  const yesPercentage = Math.round(room.yesPercentage);
-  const noPercentage = Math.round(room.noPercentage);
-
-  // Parse the deadline into seconds and update countdown
+  // Timer and Progress Update Effect (keep existing logic)
   useEffect(() => {
-    if (!room.deadline) return;
-
-    const match = room.deadline.match(/(\d+)h\s*(\d+)m|(\d+)h|(\d+)m/);
-    let seconds = 0;
-
+    if (!roomData.deadline) return;
+    let timerInterval;
+    const match = roomData.deadline.match(/(\d+)h\s*(\d+)m|(\d+)h|(\d+)m/);
+    let totalSecondsDuration = 0;
     if (match) {
       const hours = parseInt(match[1] || match[3] || 0);
       const mins = parseInt(match[2] || match[4] || 0);
-      seconds = hours * 60 * 60 + mins * 60;
+      totalSecondsDuration = hours * 60 * 60 + mins * 60;
     }
+    if (totalSecondsDuration <= 0) {
+      setTimeLeft("Invalid");
+      setProgressPercent(100);
+      return;
+    }
+    const estimatedStartTime = Date.now() - totalSecondsDuration * 0.2 * 1000;
+    const estimatedEndTime = estimatedStartTime + totalSecondsDuration * 1000;
 
-    // Update countdown every second
-    const timer = setInterval(() => {
-      seconds -= 1;
-      if (seconds <= 0) {
-        clearInterval(timer);
-        setTimeLeft("Expired");
-      } else {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-
-        if (h > 0) {
-          setTimeLeft(`${h}h ${m}m`);
-        } else if (m > 0) {
-          setTimeLeft(`${m}m ${s}s`);
-        } else {
-          setTimeLeft(`${s}s`);
-        }
-
-        // Flash the timer when less than 5 minutes remain
-        if (seconds < 300) {
-          setIsFlashing(true);
-        }
+    const updateTimerAndProgress = () => {
+      const now = Date.now();
+      const end = estimatedEndTime;
+      const start = estimatedStartTime;
+      const totalDuration = end - start;
+      if (totalDuration <= 0) {
+        setTimeLeft("Ended");
+        setProgressPercent(100);
+        clearInterval(timerInterval);
+        return;
       }
-    }, 1000);
+      const remainingSeconds = Math.max(0, Math.floor((end - now) / 1000));
+      const elapsed = Math.max(0, now - start);
+      if (remainingSeconds <= 0) {
+        setTimeLeft("Ended");
+        setProgressPercent(100);
+        clearInterval(timerInterval);
+      } else {
+        const hours = Math.floor(remainingSeconds / 3600);
+        const mins = Math.floor((remainingSeconds % 3600) / 60);
+        const secs = remainingSeconds % 60;
+        if (hours > 0) setTimeLeft(`${hours}h ${mins}m`);
+        else setTimeLeft(`${mins}m ${secs}s`);
+        const percent = Math.min(100, (elapsed / totalDuration) * 100);
+        setProgressPercent(percent);
+      }
+    };
+    updateTimerAndProgress();
+    timerInterval = setInterval(updateTimerAndProgress, 1000);
+    return () => clearInterval(timerInterval);
+  }, [roomData.deadline]);
 
-    return () => clearInterval(timer);
-  }, [room.deadline]);
+  // Calculate price difference (using existing logic structure but applying to roomData)
+  const calculatePriceDiff = () => {
+    const startValue = parseFloat(
+      String(roomData.startPrice || "0").replace(/[$,]/g, "")
+    );
+    const currentValue = parseFloat(
+      String(roomData.currentPrice || "0").replace(/[$,]/g, "")
+    );
+    if (isNaN(startValue) || isNaN(currentValue))
+      return { isIncreasing: false, percent: "N/A" };
+    const isIncreasing = currentValue >= startValue;
+    let percentDiff = 0;
+    if (startValue !== 0)
+      percentDiff = ((currentValue - startValue) / startValue) * 100;
+    else if (currentValue > 0) percentDiff = Infinity;
+    const formattedPercent = isFinite(percentDiff)
+      ? percentDiff.toFixed(2)
+      : "∞";
+    return { isIncreasing, percent: formattedPercent };
+  };
+  const priceDiff = calculatePriceDiff();
 
-  // Handle option selection
+  // Format the target criteria string
+  const formatTargetCriteria = () => {
+    const currentDeadline = timeLeft || roomData.deadline || "N/A";
+    if (roomData.type === "Price Target")
+      return `Price above ${roomData.target || "N/A"} in ${currentDeadline}`;
+    if (roomData.type === "Price Movement") {
+      const direction = roomData.target?.startsWith("+") ? "up" : "down";
+      return `Move ${
+        roomData.target || "N/A"
+      } ${direction} in ${currentDeadline}`;
+    }
+    return roomData.target || "N/A";
+  };
+
+  // --- BETTING LOGIC (Keep existing) ---
+  const [betAmount, setBetAmount] = useState("");
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [showBetForm, setShowBetForm] = useState(false);
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
     setShowBetForm(true);
   };
-
-  // Handle bet submission
   const handleSubmitBet = () => {
     if (!betAmount || !selectedOption) return;
-
-    // Call the onPlaceBet function from parent component
-    if (onPlaceBet) {
-      onPlaceBet(room.id, selectedOption, betAmount);
-    }
-
-    // Reset form
+    if (onPlaceBet) onPlaceBet(roomData.id, selectedOption, betAmount); // Use roomData.id
     setBetAmount("");
     setSelectedOption(null);
     setShowBetForm(false);
   };
+  // --- END BETTING LOGIC ---
 
-  // Get trend indicator for chart
-  const getTrendFromTarget = () => {
-    if (room.target.startsWith("+") || room.target.startsWith("-")) {
-      return room.target;
-    }
-
-    // For price targets, calculate whether it's up or down from current
-    const targetPrice = parseFloat(room.target.replace(/[$,]/g, ""));
-    const currentPrice = parseFloat(room.currentPrice.replace(/[$,]/g, ""));
-    const percentDiff = ((targetPrice - currentPrice) / currentPrice) * 100;
-
-    return percentDiff > 0
-      ? `+${percentDiff.toFixed(1)}%`
-      : `${percentDiff.toFixed(1)}%`;
-  };
-
-  // Format compact deadline display
-  const formatDeadline = (deadline) => {
-    if (!deadline) return "";
-
-    // Convert "2h 30m" to "2:30"
-    const match = deadline.match(/(\d+)h\s*(\d+)m|(\d+)h|(\d+)m/);
-    if (match) {
-      const hours = parseInt(match[1] || match[3] || 0);
-      const mins = parseInt(match[2] || match[4] || 0) || 0;
-      return `${hours}:${mins < 10 ? "0" + mins : mins}`;
-    }
-
-    return deadline;
-  };
+  // Ensure percentages are numbers for styling
+  const yesPercentageNum = Math.round(Number(roomData.yesPercentage) || 0);
+  const noPercentageNum = 100 - yesPercentageNum;
 
   return (
-    <div className={styles.roomCard}>
-      {/* Header with asset info */}
+    // Use styles from CSS Module
+    <div className={styles.cardContainer}>
+      {/* Asset and Type Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <span className={styles.assetSymbol}>{room.asset}</span>
-          {room.type === "Price Movement" ? (
-            <div className={styles.roomTypeIndicator}>
-              <span className={styles.percentSymbol}>%</span>
-            </div>
-          ) : (
-            <div className={styles.roomTypeIndicator}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className={styles.targetIcon}
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                <path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z" />
-              </svg>
-            </div>
-          )}
-        </div>
-        <div className={styles.headerRight}>
-          <div className={styles.poolInfo}>
-            <span className={styles.poolValue}>{room.totalPool}</span>
-            <span className={styles.poolLabel}>DEGEN</span>
+          {/* Ticker Box */}
+          <div className={styles.tickerBox}>
+            <span className={styles.tickerText}>{roomData.asset}</span>
           </div>
-          <div
-            className={`${styles.timer} ${
-              isFlashing ? styles.timerFlashing : ""
-            }`}
-          >
-            {timeLeft || formatDeadline(room.deadline)}
+          {/* Asset Name & Type */}
+          <div className={styles.assetInfo}>
+            <span className={styles.assetName}>
+              {getAssetName(roomData.asset)}
+            </span>
+            <div className={styles.targetTypeContainer}>
+              <div className={styles.targetTypePulse}></div>
+              <span className={styles.targetTypeText}>
+                {roomData.type === "Price Target"
+                  ? "Price Target"
+                  : "Price Movement"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.headerRight}>
+          {/* Pool Box */}
+          <div className={styles.poolBox}>
+            <svg
+              className={styles.headerIcon}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M13.5 3C8.81 3 5 5.83 5 9.5c0 3.63 3.33 6.43 8 6.94v1.56H9.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h3.5v1.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5V20h3.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H15v-1.56c4.67-.51 8-3.31 8-6.94 0-3.67-3.81-6.5-8.5-6.5h-1M13 5h1c3.07 0 5.5 1.89 5.5 4.5 0 2.55-2.28 4.42-5.25 4.5h-1.5c-2.97-.08-5.25-1.95-5.25-4.5C7.5 6.89 9.93 5 13 5z" />
+            </svg>
+            <span className={styles.headerBoxText}>
+              {roomData.totalPool?.toLocaleString() || "N/A"}
+            </span>
+          </div>
+          {/* Time Box */}
+          <div className={styles.timeBox}>
+            <svg
+              className={styles.headerIcon}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+              <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+            </svg>
+            <span className={styles.headerBoxText}>
+              {timeLeft || roomData.deadline || "N/A"}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Current price and user count */}
-      <div className={styles.infoRow}>
-        <div className={styles.priceInfo}>
-          <div className={styles.priceLabel}>Price</div>
-          <div className={styles.priceValue}>{room.currentPrice}</div>
+      {/* Main Content Area */}
+      <div className={styles.contentArea}>
+        {/* Chart Section */}
+        <div className={styles.chartContainer}>
+          {/* Grid lines for chart */}
+          <div className={styles.chartGridBackground}>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <div key={i} className={styles.chartGridLine}></div>
+            ))}
+          </div>
+          {/* SVG Chart - Using snippet's curve path */}
+          <svg
+            viewBox="0 0 100 30"
+            preserveAspectRatio="none"
+            className={styles.chartSvg}
+          >
+            <defs>
+              <linearGradient
+                id={`chartGradient-${roomData.id}`}
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="rgba(124, 58, 237, 0.3)" />
+                <stop offset="100%" stopColor="rgba(124, 58, 237, 0)" />
+              </linearGradient>
+            </defs>
+            {/* Snippet's curve path */}
+            <path
+              d="M0,20 Q10,18 20,15 T40,10 T60,12 T80,8 T100,5"
+              className={styles.chartLinePath}
+            />
+            {/* Snippet's gradient fill */}
+            <path
+              d="M0,20 Q10,18 20,15 T40,10 T60,12 T80,8 T100,5 V30 H0 Z"
+              fill={`url(#chartGradient-${roomData.id})`}
+            />
+          </svg>
         </div>
-        <div className={styles.userInfo}>
-          <span className={styles.userLabel}>Users</span>
-          <span className={styles.userCount}>
+
+        {/* Price Info Cards */}
+        <div className={styles.priceInfoGrid}>
+          <div className={styles.priceInfoCard}>
+            <div className={styles.priceInfoLabel}>Starting Price</div>
+            <div className={styles.priceInfoValueMono}>
+              {String(roomData.startPrice || "N/A")}
+            </div>
+          </div>
+          <div className={styles.priceInfoCard}>
+            <div className={styles.priceInfoLabel}>Current Price</div>
+            <div className={styles.currentPriceRow}>
+              <div className={styles.priceInfoValueMono}>
+                {String(roomData.currentPrice || "N/A")}
+              </div>
+              {priceDiff.percent !== "N/A" && (
+                <div
+                  className={`${styles.priceDiffBadge} ${
+                    priceDiff.isIncreasing
+                      ? styles.priceDiffUp
+                      : styles.priceDiffDown
+                  }`}
+                >
+                  {priceDiff.isIncreasing ? "+" : ""}
+                  {priceDiff.percent}%
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Target info */}
+        <div className={styles.targetInfoBox}>
+          <svg
+            className={styles.targetInfoIcon}
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+            <path d="M12 17L6.94 9.27 9.13 8 12 12.47 14.87 8l2.19 1.27z" />
+          </svg>
+          <span className={styles.targetInfoText}>
+            {formatTargetCriteria()}
+          </span>
+        </div>
+
+        {/* Users and Pool Info */}
+        <div className={styles.usersPoolInfoArea}>
+          <div className={styles.userCountBox}>
             <svg
-              xmlns="http://www.w3.org/2000/svg"
+              className={styles.headerIcon}
               viewBox="0 0 20 20"
               fill="currentColor"
-              className={styles.userIcon}
             >
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
-            {room.userCount}
-          </span>
-        </div>
-      </div>
-
-      {/* Main content with chart and betting */}
-      <div className={styles.mainContent}>
-        {/* Chart visualization */}
-        <div className={styles.chartContainer}>
-          <PriceChart asset={room.asset} trend={getTrendFromTarget()} />
+            <span className={styles.userCountText}>
+              {roomData.userCount || 0} Users
+            </span>
+          </div>
+          <div className={styles.poolDistributionLabel}>Pool Distribution</div>
         </div>
 
-        {/* Condensed criteria badge */}
-        <div className={styles.criteriaBadge}>
-          {room.target.startsWith("+") || room.target.startsWith("-")
-            ? `${room.target} by ${timeLeft || formatDeadline(room.deadline)}`
-            : `Target: ${room.target}`}
-        </div>
-
-        {/* Pool distribution visualization with percentages inside the meter */}
-        <div className={styles.poolStats}>
-          <div className={styles.poolBarContainer}>
-            <div className={styles.poolBar}>
-              <div
-                className={styles.yesPercentage}
-                style={{ width: `${yesPercentage}%` }}
-              >
-                {yesPercentage > 10 && (
-                  <span className={styles.yesPercentLabel}>
-                    {yesPercentage}%
-                  </span>
-                )}
-              </div>
-              {noPercentage > 10 && (
-                <span
-                  className={styles.noPercentLabel}
-                  style={{
-                    left: `${Math.min(
-                      yesPercentage + 2,
-                      100 - noPercentage / 2
-                    )}%`,
-                  }}
-                >
-                  {noPercentage}%
+        {/* Pool distribution bar */}
+        <div className={styles.poolBarContainer}>
+          <div className={styles.poolBarInner}>
+            {/* YES segment */}
+            <div
+              className={styles.poolBarYes}
+              style={{ width: `${yesPercentageNum}%` }}
+            >
+              {yesPercentageNum > 10 && (
+                <span className={styles.poolBarLabelYes}>
+                  YES {yesPercentageNum}%
+                </span>
+              )}
+            </div>
+            {/* NO segment (implicitly takes remaining space, text positioned absolutely or flexed) */}
+            <div className={styles.poolBarNo}>
+              {noPercentageNum > 10 && (
+                <span className={styles.poolBarLabelNo}>
+                  NO {noPercentageNum}%
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Betting interface right below the meter */}
+        {/* Betting buttons */}
+        {/* Betting Interface - Reuse existing logic */}
         {!showBetForm ? (
-          <div className={styles.betButtons}>
+          <div className={styles.betButtonsGrid}>
+            {/* Use button styles derived from snippet */}
             <button
-              className={styles.betYesButton}
+              className={styles.betButtonYes}
               onClick={() => handleOptionSelect("UP")}
             >
               YES
             </button>
             <button
-              className={styles.betNoButton}
+              className={styles.betButtonNo}
               onClick={() => handleOptionSelect("DOWN")}
             >
               NO
@@ -308,6 +342,8 @@ const RoomCard = ({ room, onPlaceBet }) => {
           </div>
         ) : (
           <div className={styles.betForm}>
+            {" "}
+            {/* Keep existing form structure */}
             <div className={styles.inputGroup}>
               <input
                 type="number"
